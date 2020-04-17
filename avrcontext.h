@@ -35,8 +35,8 @@ typedef struct avr_context_t_ {
     } sp;
 } avr_context_t;
 
-/* Some utility macros, most of the define offsets to simplify working with the
-machine context structure definition, provided above. */
+/* Some utility macros, most of them define offsets to simplify working on the
+machine context structure from within assembly code. */
 #define AVR_CONTEXT_ASM(code) asm volatile ( code );
 
 #define AVR_CONTEXT_ASMCONST(name, value) \
@@ -57,7 +57,41 @@ AVR_CONTEXT_ASMCONST(AVR_CONTEXT_OFFSET_SP_H, 36)
 #define AVR_CONTEXT_BACK_OFFSET_R26 9
 AVR_CONTEXT_ASMCONST(AVR_CONTEXT_BACK_OFFSET_R26, 9)
 
-#define AVR_SAVE_CONTEXT(presave_code, load_pointer_to_Z_code)          \
+/*
+AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT macros provide the generic facility for
+saving/restoring an AVR CPU context.
+
+Using them directly needed only in rare cases, please consider using *context()
+functions provided below. These macros may be useful when implementing
+Interrupt System Routines, though.
+
+Please keep in mind that *context() functions implemented on top of
+AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT.
+
+The code in the macros expects that the pointer register Z (R31:R30) contains the address of an
+avr_context_t structure.
+
+The argument named 'load_address_to_Z_code' should be a string constant which
+contains assembly instructions. These instructions should load the address of
+an avr_context_t to Z. Before executing this code, the original values in register Z preserved.
+
+The argument named 'presave_code' should be a string constant which
+contains assembly instructions which get executed right after preserving the SREG
+register value. If you want to disable interrupts before saving the context, it is the
+right place to do it.
+
+Please note that, in general, after executing the code in 'presave_code',
+'load_address_to_Z_code', should restore the original values of the general-purpose registers,
+the stack pointer, and, in most cases, the status register.
+
+One could have noted that using these macros is quite cumbersome, but this is a very low-level code
+and in some cases, it is rather hard (or impossible) to provide a reasonable interface
+for the low-level functionality.
+
+I want to stress it one more time: if in doubt please use avr_getcontext()/avr_setcontext()/
+avr_swapcontext()/avr_makecontext().
+ */
+#define AVR_SAVE_CONTEXT(presave_code, load_address_to_Z_code)          \
     AVR_CONTEXT_ASM(                                                    \
         /* push Z*/                                                     \
         "push r30\n"                                                    \
@@ -69,7 +103,7 @@ AVR_CONTEXT_ASMCONST(AVR_CONTEXT_BACK_OFFSET_R26, 9)
         /* Push SREG value. */                                          \
         "push r30\n"                                                    \
         /* Load address of a context pointer structure to Z */          \
-        "\n" load_pointer_to_Z_code "\n"                                \
+        "\n" load_address_to_Z_code "\n"                                \
         /* save SREG to the context structure */                        \
         "pop r0\n"                                                      \
         "st Z+, r0\n"                                                   \
@@ -155,11 +189,11 @@ AVR_CONTEXT_ASMCONST(AVR_CONTEXT_BACK_OFFSET_R26, 9)
         "pop r29\n"                                                     \
         "pop r28\n")
 
-#define AVR_RESTORE_CONTEXT(load_pointer_to_Z_code)                     \
+#define AVR_RESTORE_CONTEXT(load_address_to_Z_code)                     \
     AVR_CONTEXT_ASM(                                                    \
         /* load address of a context structure pointer to Z */          \
         "\n"                                                            \
-        load_pointer_to_Z_code                                          \
+        load_address_to_Z_code                                          \
         "\n"                                                            \
         /* Go to the end of the context structure and */                \
         /* start restoring it from there. */                            \
