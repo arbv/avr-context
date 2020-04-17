@@ -36,11 +36,9 @@ typedef struct avr_context_t_ {
 } avr_context_t;
 
 /* Some utility macros, most of them define offsets to simplify working on the
-machine context structure from within assembly code. */
-#define AVR_CONTEXT_ASM(code) asm volatile ( code );
-
-#define AVR_CONTEXT_ASMCONST(name, value) \
-    AVR_CONTEXT_ASM(".equ " #name "," #value "\n")
+   machine context structure from within assembly code. */
+#define AVR_CONTEXT_ASMCONST(name, value)\
+    asm(".equ " #name "," #value "\n");
 
 #define AVR_CONTEXT_OFFSET_PC_L 33
 AVR_CONTEXT_ASMCONST(AVR_CONTEXT_OFFSET_PC_L, 33)
@@ -69,7 +67,8 @@ Please keep in mind that *context() functions implemented on top of
 AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT.
 
 The code in the macros expects that the pointer register Z (R31:R30) contains the address of an
-avr_context_t structure.
+avr_context_t structure. Additionally to that, the code expects to find the return address
+on top of the stack (like after the CALL family of instructions).
 
 The argument named 'load_address_to_Z_code' should be a string constant which
 contains assembly instructions. These instructions should load the address of
@@ -92,7 +91,7 @@ I want to stress it one more time: if in doubt please use avr_getcontext()/avr_s
 avr_swapcontext()/avr_makecontext().
  */
 #define AVR_SAVE_CONTEXT(presave_code, load_address_to_Z_code)          \
-    AVR_CONTEXT_ASM(                                                    \
+    asm volatile(                                                       \
         /* push Z*/                                                     \
         "push r30\n"                                                    \
         "push r31\n"                                                    \
@@ -190,7 +189,7 @@ avr_swapcontext()/avr_makecontext().
         "pop r28\n")
 
 #define AVR_RESTORE_CONTEXT(load_address_to_Z_code)                     \
-    AVR_CONTEXT_ASM(                                                    \
+    asm volatile(                                                       \
         /* load address of a context structure pointer to Z */          \
         "\n"                                                            \
         load_address_to_Z_code                                          \
@@ -259,23 +258,50 @@ avr_swapcontext()/avr_makecontext().
         "pop r30\n"                                                     \
         "pop r31\n")
 
-#define AVR_RESTORE_CONTEXT_GLOBAL_POINTER(global_context_pointer)      \
-    AVR_RESTORE_CONTEXT(                                                \
-    "lds ZL, " #global_context_pointer "\n"                             \
-    "lds ZH, " #global_context_pointer " + 1\n")
+/*
+AVR_RESTORE_CONTEXT_GLOBAL_POINTER and AVR_SAVE_CONTEXT_GLOBAL_POINTER
+macros provide the generic facility for saving/restoring an AVR CPU context
+to/from a structure via a global pointer variable.
 
+Please make sure that the pointer defined as a volatile pointer. If you use C++,
+wrap the pointer declaration in 'extern "C" { .. }' to avoid name mangling.
+
+Example pointer definition:
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    avr_context_t *volatile avr_current_ctx;
+#ifdef __cplusplus
+}
+#endif
+
+As these macros implemented on top of the AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT,
+please make sure that you understand how they work.
+*/
 #define AVR_SAVE_CONTEXT_GLOBAL_POINTER(presave_code, global_context_pointer) \
-    AVR_SAVE_CONTEXT(#presave_code,                                     \
-                     "lds ZL, "#global_context_pointer"\n"              \
-                     "lds ZH, "#global_context_pointer" + 1\n")
+    AVR_SAVE_CONTEXT(                                                   \
+        #presave_code,                                                  \
+        "lds ZL, "#global_context_pointer"\n"                           \
+        "lds ZH, "#global_context_pointer" + 1\n")
+
+#define AVR_RESTORE_CONTEXT_GLOBAL_POINTER(global_context_pointer)  \
+    AVR_RESTORE_CONTEXT(                                            \
+        "lds ZL, " #global_context_pointer "\n"                     \
+        "lds ZH, " #global_context_pointer " + 1\n")
 
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus */
-    extern void avr_getcontext(avr_context_t *cp);
-    extern void avr_setcontext(avr_context_t *cp);
-    extern void avr_swapcontext(avr_context_t *oucp, avr_context_t *cp);
-    extern void avr_makecontext(avr_context_t *cp, void *stackp, size_t stack_size, void (*func)(void *), void *funcarg);
+
+extern void avr_getcontext(avr_context_t *cp);
+extern void avr_setcontext(avr_context_t *cp);
+extern void avr_swapcontext(avr_context_t *oucp, avr_context_t *cp);
+extern void avr_makecontext(avr_context_t *cp,
+                            void *stackp, size_t stack_size,
+                            avr_context_t *successor_cp,
+                            void (*funcp)(void *), void *funcargp);
+
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */

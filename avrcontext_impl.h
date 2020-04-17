@@ -46,9 +46,13 @@ void avr_swapcontext(avr_context_t *oucp, avr_context_t *ucp)
     asm volatile ("ret\n");
 }
 
+#ifdef __cplusplus
 extern "C" {
-    static void avr_makecontext_callfunc(avr_context_t *successor, void (*func)(void *), void *funcarg);
+#endif /*__cplusplus **/
+static void avr_makecontext_callfunc(avr_context_t *successor, void (*func)(void *), void *funcarg);
+#ifdef __cplusplus
 }
+#endif /*__cplusplus */
 static void avr_makecontext_callfunc(avr_context_t *successor, void (*func)(void *), void *funcarg)
 {
     func(funcarg);
