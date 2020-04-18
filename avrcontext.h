@@ -9,12 +9,6 @@
 
 #ifdef __AVR__
 
-/*
-It is highly unlikely to understand the following code without:
-a) basic understanding of AVR assembly language;
-b) reading about avr-gcc's ABI beforehand (https://gcc.gnu.org/wiki/avr-gcc).
-*/
-
 /* AVR machine context definition. Please keep the corresponding routines/macros synchronised with this definition. */
 typedef struct avr_context_t_ {
     uint8_t sreg;
@@ -34,6 +28,28 @@ typedef struct avr_context_t_ {
         void *ptr;
     } sp;
 } avr_context_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif /*__cplusplus */
+
+extern void avr_getcontext(avr_context_t *cp);
+extern void avr_setcontext(const avr_context_t *cp);
+extern void avr_swapcontext(avr_context_t *oucp, const avr_context_t *cp);
+extern void avr_makecontext(avr_context_t *cp,
+                            void *stackp, const size_t stack_size,
+                            const avr_context_t *successor_cp,
+                            void (*funcp)(void *), void *funcargp);
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus */
+
+/*
+It is highly unlikely to understand the following code without:
+a) basic understanding of AVR assembly language;
+b) reading about avr-gcc's ABI beforehand (https://gcc.gnu.org/wiki/avr-gcc).
+*/
 
 /* Some utility macros, most of them define offsets to simplify working on the
    machine context structure from within assembly code. */
@@ -289,22 +305,6 @@ please make sure that you understand how they work.
     AVR_RESTORE_CONTEXT(                                            \
         "lds ZL, " #global_context_pointer "\n"                     \
         "lds ZH, " #global_context_pointer " + 1\n")
-
-#ifdef __cplusplus
-extern "C" {
-#endif /*__cplusplus */
-
-extern void avr_getcontext(avr_context_t *cp);
-extern void avr_setcontext(avr_context_t *cp);
-extern void avr_swapcontext(avr_context_t *oucp, avr_context_t *cp);
-extern void avr_makecontext(avr_context_t *cp,
-                            void *stackp, size_t stack_size,
-                            avr_context_t *successor_cp,
-                            void (*funcp)(void *), void *funcargp);
-
-#ifdef __cplusplus
-}
-#endif /*__cplusplus */
 
 #endif /* __AVR__ */
 

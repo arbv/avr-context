@@ -20,8 +20,8 @@ void avr_getcontext(avr_context_t *cp)
     asm volatile ("ret\n");
 }
 
-void avr_setcontext(avr_context_t *cp) __attribute__ ((naked));
-void avr_setcontext(avr_context_t *cp)
+void avr_setcontext(const avr_context_t *cp) __attribute__ ((naked));
+void avr_setcontext(const avr_context_t *cp)
 {
     (void)cp; /* to avoid compiler warnings */
     AVR_RESTORE_CONTEXT(
@@ -31,8 +31,8 @@ void avr_setcontext(avr_context_t *cp)
 }
 
 
-void avr_swapcontext(avr_context_t *oucp, avr_context_t *ucp)  __attribute__ ((naked));
-void avr_swapcontext(avr_context_t *oucp, avr_context_t *ucp)
+void avr_swapcontext(avr_context_t *oucp, const avr_context_t *ucp)  __attribute__ ((naked));
+void avr_swapcontext(avr_context_t *oucp, const avr_context_t *ucp)
 {
     (void)oucp; /* to avoid compiler warnings */
     (void)ucp;
@@ -49,17 +49,17 @@ void avr_swapcontext(avr_context_t *oucp, avr_context_t *ucp)
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus **/
-static void avr_makecontext_callfunc(avr_context_t *successor, void (*func)(void *), void *funcarg);
+static void avr_makecontext_callfunc(const avr_context_t *successor, void (*func)(void *), void *funcarg);
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */
-static void avr_makecontext_callfunc(avr_context_t *successor, void (*func)(void *), void *funcarg)
+static void avr_makecontext_callfunc(const avr_context_t *successor, void (*func)(void *), void *funcarg)
 {
     func(funcarg);
     avr_setcontext(successor);
 }
 
-void avr_makecontext(avr_context_t *cp, void *stackp, size_t stack_size, avr_context_t *successor_cp, void (*funcp)(void *), void *funcargp)
+void avr_makecontext(avr_context_t *cp, void *stackp, const size_t stack_size, const avr_context_t *successor_cp, void (*funcp)(void *), void *funcargp)
 {
     uint16_t addr;
     uint8_t *p = (uint8_t *)&addr;
