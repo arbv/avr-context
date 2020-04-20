@@ -9,7 +9,8 @@
 
 #ifdef __AVR__
 
-/* AVR machine context definition. Please keep the corresponding routines/macros synchronised with this definition. */
+/* AVR machine context definition. Please keep the corresponding
+ * routines/macros synchronised with this definition. */
 typedef struct avr_context_t_ {
     uint8_t sreg;
     uint8_t r[32];
@@ -32,7 +33,72 @@ typedef struct avr_context_t_ {
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus */
+/*
+The four functions avr_getcontext(), avr_setcontext(),
+avr_swapcontext(), and avr_makecontext() provide facility for context
+switching between multiple threads of execution.
 
+These functions provide more or less direct substitutes to the
+functions getcontext(), setcontext(), swapcontext(), and makecontext()
+which used to be a part of the POSIX standard. It is recommended to
+read about them before using the functions from this library:
+
+https://pubs.opengroup.org/onlinepubs/009695399/functions/getcontext.html
+https://pubs.opengroup.org/onlinepubs/009695399/functions/makecontext.html
+
+http://man7.org/linux/man-pages/man3/setcontext.3.html
+http://man7.org/linux/man-pages/man3/makecontext.3.html
+
+There are multiple important differences between the functions from
+this library and their equivalents from the POSIX standard:
+
+a) These functions do not perform sanity checking of their input
+parameters. This is a deliberate decision. They are barely useful on
+their own, in most cases, they used as a basis for implementing
+higher-level abstractions. Thus, it is better to perform sanity
+checking at the higher levels. Moreover, these functions tend to
+appear in the hot spots of the application, where additional sanity
+checks lead to extra wasted CPU cycles. This might be not acceptable
+behaviour when programming MCUs.
+
+b) As the direct consequence of the above: there is no error
+reporting. These functions will gladly accept whatever you pass to
+them. If you have passed to them something unintentionally, that could
+lead to undefined behaviour (e.g. it could lead to a mess in an MCU's
+memory).
+
+The two paragraphs above mean that these functions built around the
+GIGO principle (Garbage In, Garbage Out). One could call them
+"unsafe", but I prefer to call them "sharp".
+*/
+/*
+The function avr_getcontext() initialises the structure pointed at by
+'cp' to the currently active context.
+
+The function avr_setcontext() restores the context from the structure
+pointed at by 'cp.'  The context should have been obtained by a call
+to avr_getcontext(), avr_swapcontext() or avr_makecontext(). In the
+case, the context has been obtained by a call to the avr_getcontext()
+or avr_swapcontext() program execution continues as if the call has
+just returned. The function avr_setcontext() never returns.
+
+The function avr_swapcontext() saves the current context in the
+structure pointed to by 'oucp' and then activates the context pointed
+to by 'cp' as one operation. It may return later when context pointed
+to by 'oucp' gets activated.
+
+The function avr_makecontext() modifies the context obtained by a call
+to avr_getcontext() and pointed to by 'oucp' in such a way that upon
+activation the function 'funcp' gets called with the 'funcargp' value
+passed as its argument. When this function returns, the successor
+context 'successor_cp' gets activated. Thus, the successor context
+MUST be a valid context before the activation of the context pointed
+to by 'oucp.'
+
+Before invoking the avr_makecontext(), the caller must allocate a new
+stack for the modifiable context and pass pointer to it (stackp) and
+size of the memory region (stack_size).
+*/
 extern void avr_getcontext(avr_context_t *cp);
 extern void avr_setcontext(const avr_context_t *cp);
 extern void avr_swapcontext(avr_context_t *oucp, const avr_context_t *cp);
@@ -72,39 +138,43 @@ AVR_CONTEXT_ASMCONST(AVR_CONTEXT_OFFSET_SP_H, 36)
 AVR_CONTEXT_ASMCONST(AVR_CONTEXT_BACK_OFFSET_R26, 9)
 
 /*
-AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT macros provide the generic facility for
-saving/restoring an AVR CPU context.
+AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT macros provide the generic
+facility for saving/restoring an AVR CPU context.
 
-Using them directly needed only in rare cases, please consider using *context()
-functions provided below. These macros may be useful when implementing
-Interrupt System Routines, though.
+Using them directly needed only in rare cases, please consider using
+*context() functions provided below. These macros may be useful when
+implementing Interrupt System Routines, though.
 
 Please keep in mind that *context() functions implemented on top of
 AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT.
 
-The code in the macros expects that the pointer register Z (R31:R30) contains the address of an
-avr_context_t structure. Additionally to that, the code expects to find the return address
-on top of the stack (like after the CALL family of instructions).
+The code in the macros expects that the pointer register Z (R31:R30)
+contains the address of an avr_context_t structure. Additionally to
+that, the code expects to find the return address on top of the stack
+(like after the CALL family of instructions).
 
-The argument named 'load_address_to_Z_code' should be a string constant which
-contains assembly instructions. These instructions should load the address of
-an avr_context_t to Z. Before executing this code, the original values in register Z preserved.
+The argument named 'load_address_to_Z_code' should be a string
+constant which contains assembly instructions. These instructions
+should load the address of an avr_context_t to Z. Before executing
+this code, the original values in register Z preserved.
 
 The argument named 'presave_code' should be a string constant which
-contains assembly instructions which get executed right after preserving the SREG
-register value. If you want to disable interrupts before saving the context, it is the
-right place to do it.
+contains assembly instructions which get executed right after
+preserving the SREG register value. If you want to disable interrupts
+before saving the context, it is the right place to do it.
 
-Please note that, in general, after executing the code in 'presave_code',
-'load_address_to_Z_code', should restore the original values of the general-purpose registers,
-the stack pointer, and, in most cases, the status register.
+Please note that, in general, after executing the code in
+'presave_code', 'load_address_to_Z_code', should restore the original
+values of the general-purpose registers, the stack pointer, and, in
+most cases, the status register.
 
-One could have noted that using these macros is quite cumbersome, but this is a very low-level code
-and in some cases, it is rather hard (or impossible) to provide a reasonable interface
-for the low-level functionality.
+One could have noted that using these macros is quite cumbersome, but
+this is a very low-level code and in some cases, it is rather hard (or
+impossible) to provide a reasonable interface for the low-level
+functionality.
 
-I want to stress it one more time: if in doubt please use avr_getcontext()/avr_setcontext()/
-avr_swapcontext()/avr_makecontext().
+I want to stress it one more time: if in doubt please use
+avr_getcontext()/avr_setcontext()/avr_swapcontext()/avr_makecontext().
  */
 #define AVR_SAVE_CONTEXT(presave_code, load_address_to_Z_code)          \
     asm volatile(                                                       \
@@ -276,11 +346,12 @@ avr_swapcontext()/avr_makecontext().
 
 /*
 AVR_RESTORE_CONTEXT_GLOBAL_POINTER and AVR_SAVE_CONTEXT_GLOBAL_POINTER
-macros provide the generic facility for saving/restoring an AVR CPU context
-to/from a structure via a global pointer variable.
+macros provide the generic facility for saving/restoring an AVR CPU
+context to/from a structure via a global pointer variable.
 
-Please make sure that the pointer defined as a volatile pointer. If you use C++,
-wrap the pointer declaration in 'extern "C" { .. }' to avoid name mangling.
+Please make sure that the pointer defined as a volatile pointer. If
+you use C++, wrap the pointer declaration in 'extern "C" { .. }' to
+avoid name mangling.
 
 Example pointer definition:
 
@@ -292,8 +363,9 @@ extern "C" {
 }
 #endif
 
-As these macros implemented on top of the AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT,
-please make sure that you understand how they work.
+As these macros implemented on top of the AVR_SAVE_CONTEXT and
+AVR_RESTORE_CONTEXT, please make sure that you understand how they
+work.
 */
 #define AVR_SAVE_CONTEXT_GLOBAL_POINTER(presave_code, global_context_pointer) \
     AVR_SAVE_CONTEXT(                                                   \
