@@ -78,14 +78,16 @@ The function avr_getcontext() initialises the structure pointed at by
 The function avr_setcontext() restores the context from the structure
 pointed at by 'cp.'  The context should have been obtained by a call
 to avr_getcontext(), avr_swapcontext() or avr_makecontext(). In the
-case, the context has been obtained by a call to the avr_getcontext()
-or avr_swapcontext() program execution continues as if the call has
-just returned. The function avr_setcontext() never returns.
+case, when the context has been obtained by a call to the
+avr_getcontext() or avr_swapcontext() program execution continues as
+if the call has just returned. The function avr_setcontext() never
+returns.
 
 The function avr_swapcontext() saves the current context in the
-structure pointed to by 'oucp' and then activates the context pointed
-to by 'cp' as one operation. It may return later when context pointed
-to by 'oucp' gets activated.
+structure pointed to by 'cp' and then activates the context pointed to
+by 'cp' as one operation. It may return later when context pointed to
+by 'oucp' gets activated. Calling avr_swapcontext() with 'cp' and
+'oucp' pointing to the same structure is undefined behaviour.
 
 The function avr_makecontext() modifies the context obtained by a call
 to avr_getcontext() and pointed to by 'oucp' in such a way that upon
@@ -93,11 +95,11 @@ activation the function 'funcp' gets called with the 'funcargp' value
 passed as its argument. When this function returns, the successor
 context 'successor_cp' gets activated. Thus, the successor context
 MUST be a valid context before the activation of the context pointed
-to by 'oucp.'
+to by 'cp.'
 
 Before invoking the avr_makecontext(), the caller must allocate a new
 stack for the modifiable context and pass pointer to it (stackp) and
-size of the memory region (stack_size).
+the size of the memory region (stack_size).
 */
 extern void avr_getcontext(avr_context_t *cp);
 extern void avr_setcontext(const avr_context_t *cp);
@@ -142,7 +144,7 @@ AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT macros provide the generic
 facility for saving/restoring an AVR CPU context.
 
 Using them directly needed only in rare cases, please consider using
-*context() functions provided below. These macros may be useful when
+*context() functions described above. These macros may be useful when
 implementing Interrupt System Routines, though.
 
 Please keep in mind that *context() functions implemented on top of
@@ -151,7 +153,8 @@ AVR_SAVE_CONTEXT and AVR_RESTORE_CONTEXT.
 The code in the macros expects that the pointer register Z (R31:R30)
 contains the address of an avr_context_t structure. Additionally to
 that, the code expects to find the return address on top of the stack
-(like after the CALL family of instructions).
+(like after the CALL family of instructions, or during an interrupt
+handling).
 
 The argument named 'load_address_to_Z_code' should be a string
 constant which contains assembly instructions. These instructions
@@ -160,13 +163,14 @@ this code, the original values in register Z preserved.
 
 The argument named 'presave_code' should be a string constant which
 contains assembly instructions which get executed right after
-preserving the SREG register value. If you want to disable interrupts
-before saving the context, it is the right place to do it.
+preserving the SREG register value. If, for example, you want to
+disable interrupts before saving the context, it is the right place to
+do it.
 
 Please note that, in general, after executing the code in
-'presave_code', 'load_address_to_Z_code', should restore the original
-values of the general-purpose registers, the stack pointer, and, in
-most cases, the status register.
+'presave_code', 'load_address_to_Z_code', one should restore the
+original values of the general-purpose registers, the stack pointer,
+and, in most cases, the status register.
 
 One could have noted that using these macros is quite cumbersome, but
 this is a very low-level code and in some cases, it is rather hard (or
@@ -358,7 +362,7 @@ Example pointer definition:
 #ifdef __cplusplus
 extern "C" {
 #endif
-    avr_context_t *volatile avr_current_ctx;
+avr_context_t *volatile avr_current_ctx;
 #ifdef __cplusplus
 }
 #endif

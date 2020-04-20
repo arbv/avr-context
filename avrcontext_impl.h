@@ -4,6 +4,12 @@
   See LICENSE.txt for license details.
 */
 
+/*
+This file contains definitions of the context manipulation functions.
+It meant to be included after 'avrcontext.h'.
+In general, you should include it only once across the project.
+*/
+
 #ifndef AVRCONTEXT_IMPL_H
 #define AVRCONTEXT_IMPL_H
 
