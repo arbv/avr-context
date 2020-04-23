@@ -50,7 +50,7 @@ void avr_makecontext(avr_context_t *cp,
                      void (*funcp)(void *), void *funcargp);
 ```
 
-The function `avr_swapcontext()` saves the current context in the structure pointed to by `oucp` and then activates the context pointed to by `cp` as one operation. It may return later when context pointed to by `oucp` gets activated. Calling `avr_swapcontext()` with `cp` and `oucp` pointing to the same structure leads to undefined behaviour.
+The function `avr_swapcontext()` saves the current context in the structure pointed to by `oucp` and then activates the context pointed to by `cp` as one operation. It may return later when context pointed to by `oucp` gets activated.
 
 The function `avr_makecontext()` modifies the context obtained by a call to `avr_getcontext()` and pointed to by `cp` in such a way that upon activation the function `funcp` gets called with the `funcargp` value passed as its argument. When this function returns, the successor context `successor_cp` gets activated. Thus, the successor context **must** be a valid context before the activation of the context pointed to by `cp`.
 

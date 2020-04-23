@@ -86,8 +86,7 @@ returns.
 The function avr_swapcontext() saves the current context in the
 structure pointed to by 'cp' and then activates the context pointed to
 by 'cp' as one operation. It may return later when context pointed to
-by 'oucp' gets activated. Calling avr_swapcontext() with 'cp' and
-'oucp' pointing to the same structure is undefined behaviour.
+by 'oucp' gets activated.
 
 The function avr_makecontext() modifies the context obtained by a call
 to avr_getcontext() and pointed to by 'oucp' in such a way that upon
@@ -373,7 +372,7 @@ work.
 */
 #define AVR_SAVE_CONTEXT_GLOBAL_POINTER(presave_code, global_context_pointer) \
     AVR_SAVE_CONTEXT(                                                   \
-        #presave_code,                                                  \
+        presave_code,                                                  \
         "lds ZL, "#global_context_pointer"\n"                           \
         "lds ZH, "#global_context_pointer" + 1\n")
 
