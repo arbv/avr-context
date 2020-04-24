@@ -1,4 +1,5 @@
 /*
+  Author: Artem Boldariev <artem@boldariev.com>
   The software distributed under the terms of the MIT/Expat license.
 
   See LICENSE.txt for license details.
