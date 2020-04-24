@@ -21,7 +21,7 @@ The `avr_context_t` represents a machine context. It should be treated as an opa
 
 The four functions `avr_getcontext()`, `avr_setcontext()`, `avr_swapcontext()`, and `avr_makecontext()` provide facility for context switching between multiple threads of execution.
 
-These functions provide more or less direct substitutes to the functions `getcontext()`, `setcontext()`, `swapcontext()`, and `makecontext()` which used to be a part of the POSIX standard. It is recommended to read about them before using the functions from this library.
+These functions provide more or less direct substitutes to the functions `getcontext()`, `setcontext()`, `swapcontext()`, and `makecontext()` which used to be a part of the POSIX standard. It is recommended to read about them before using the functions from this library[[1]](https://pubs.opengroup.org/onlinepubs/009695399/functions/getcontext.html)[[2]](https://pubs.opengroup.org/onlinepubs/009695399/functions/makecontext.html)[[3]](http://man7.org/linux/man-pages/man3/setcontext.3.html)[[4]](http://man7.org/linux/man-pages/man3/makecontext.3.html).
 
 There are multiple important differences between the functions from this library and their equivalents from the POSIX standard:
 
