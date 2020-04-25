@@ -154,7 +154,8 @@ The code in the macros expects that the pointer register Z (R31:R30)
 contains the address of an avr_context_t structure. Additionally to
 that, the code expects to find the return address on top of the stack
 (like after the CALL family of instructions, or during an interrupt
-handling).
+handling). In fact, the macros are barely useful anywhere else except
+the naked interrupt system routines.
 
 The argument named 'load_address_to_Z_code' should be a string
 constant which contains assembly instructions. These instructions
