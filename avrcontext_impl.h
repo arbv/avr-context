@@ -87,16 +87,19 @@ void avr_makecontext(avr_context_t *cp, void *stackp, const size_t stack_size, c
 }
 
 #if __cplusplus >= 201103L
-inline void avr_mcontext_dummy_compilation_test(void)
+/*
+See bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=49171
+*/
+inline void avr_context_sanity_checks(void)
 {
     avr_context_t test;
-    static_assert(static_cast<void *>(&test) == static_cast<void *>(&test.sreg));
+    static_assert(reinterpret_cast<uintptr_t>(&test) == reinterpret_cast<uintptr_t>(&test.sreg));
     static_assert(sizeof(avr_context_t) == 37);
-    static_assert(reinterpret_cast<uint8_t *>(&test.sp.part.low) - reinterpret_cast<uint8_t *>(&test) == AVR_CONTEXT_OFFSET_SP_L);
-    static_assert(reinterpret_cast<uint8_t *>(&test.sp.part.high) - reinterpret_cast<uint8_t *>(&test) == AVR_CONTEXT_OFFSET_SP_H);
-    static_assert(reinterpret_cast<uint8_t *>(&test.pc.part.low) - reinterpret_cast<uint8_t *>(&test) == AVR_CONTEXT_OFFSET_PC_L);
-    static_assert(reinterpret_cast<uint8_t *>(&test.pc.part.high) - reinterpret_cast<uint8_t *>(&test) == AVR_CONTEXT_OFFSET_PC_H);
-    static_assert(reinterpret_cast<uint8_t *>(&test.sp.part.high) - AVR_CONTEXT_BACK_OFFSET_R26 == reinterpret_cast<uint8_t *>(&test.r[26]));
+    static_assert(reinterpret_cast<uintptr_t>(&test.sp.part.low) - reinterpret_cast<uintptr_t>(&test) == AVR_CONTEXT_OFFSET_SP_L);
+    static_assert(reinterpret_cast<uintptr_t>(&test.sp.part.high) - reinterpret_cast<uintptr_t>(&test) == AVR_CONTEXT_OFFSET_SP_H);
+    static_assert(reinterpret_cast<uintptr_t>(&test.pc.part.low) - reinterpret_cast<uintptr_t>(&test) == AVR_CONTEXT_OFFSET_PC_L);
+    static_assert(reinterpret_cast<uintptr_t>(&test.pc.part.high) - reinterpret_cast<uintptr_t>(&test) == AVR_CONTEXT_OFFSET_PC_H);
+    static_assert(reinterpret_cast<uintptr_t>(&test.sp.part.high) - reinterpret_cast<uintptr_t>(&test.r[26]) == AVR_CONTEXT_BACK_OFFSET_R26);
 }
 #endif /* __cplusplus */
 
