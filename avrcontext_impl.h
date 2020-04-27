@@ -24,7 +24,7 @@ void avr_getcontext(avr_context_t *cp)
         "",
         "mov r30, r24\n"
         "mov r31, r25\n");
-    asm volatile ("ret\n");
+    __asm__ __volatile__ ("ret\n");
 }
 
 void avr_setcontext(const avr_context_t *cp) __attribute__ ((naked));
@@ -34,7 +34,7 @@ void avr_setcontext(const avr_context_t *cp)
     AVR_RESTORE_CONTEXT(
         "mov r30, r24\n"
         "mov r31, r25\n");
-    asm volatile ("ret\n");
+    __asm__ __volatile__ ("ret\n");
 }
 
 
@@ -50,7 +50,7 @@ void avr_swapcontext(avr_context_t *oucp, const avr_context_t *ucp)
     AVR_RESTORE_CONTEXT(
         "mov r30, r22\n"
         "mov r31, r23\n");
-    asm volatile ("ret\n");
+    __asm__ __volatile__ ("ret\n");
 }
 
 #ifdef __cplusplus

@@ -122,7 +122,7 @@ b) reading about avr-gcc's ABI beforehand (https://gcc.gnu.org/wiki/avr-gcc).
 /* Some utility macros, most of them define offsets to simplify working on the
    machine context structure from within assembly code. */
 #define AVR_CONTEXT_ASMCONST(name, value)\
-    asm(".equ " #name "," #value "\n");
+    __asm__(".equ " #name "," #value "\n");
 
 #define AVR_CONTEXT_OFFSET_PC_L 33
 AVR_CONTEXT_ASMCONST(AVR_CONTEXT_OFFSET_PC_L, 33)
@@ -182,7 +182,7 @@ I want to stress it one more time: if in doubt please use
 avr_getcontext()/avr_setcontext()/avr_swapcontext()/avr_makecontext().
  */
 #define AVR_SAVE_CONTEXT(presave_code, load_address_to_Z_code)          \
-    asm volatile(                                                       \
+    __asm__ __volatile__(                                                       \
         /* push Z*/                                                     \
         "push r30\n"                                                    \
         "push r31\n"                                                    \
@@ -280,7 +280,7 @@ avr_getcontext()/avr_setcontext()/avr_swapcontext()/avr_makecontext().
         "pop r28\n")
 
 #define AVR_RESTORE_CONTEXT(load_address_to_Z_code)                     \
-    asm volatile(                                                       \
+    __asm__ __volatile__(                                                       \
         /* load address of a context structure pointer to Z */          \
         "\n"                                                            \
         load_address_to_Z_code                                          \
