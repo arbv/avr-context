@@ -6,7 +6,7 @@ It is safe to say that this library contains implementations (or, rather, substi
 
 One can use the provided functionality in many creative ways. For example, on top of this one can implement:
 
-* co-routines and fibers;
+* coroutines and fibers;
 * cooperative and preemptive multitasking;
 * complex error recovery mechanisms;
 * profiling.
@@ -200,9 +200,9 @@ finish f1
 loop() end
 ```
 
-### [Low-Level Stackful Co-Routines](./examples/03.Low-Level_Stackful_Co-Routines/03.Low-Level_Stackful_Co-Routines.ino)
+### [Low-Level Stackful Coroutines](./examples/03.Low-Level_Stackful_Coroutines/03.Low-Level_Stackful_Coroutines.ino)
 
-This example demonstrates how `avr_makecontext()` and `avr_swapcontext()` could be used to implement co-routines.
+This example demonstrates how `avr_makecontext()` and `avr_swapcontext()` could be used to implement coroutines.
 
 When being uploaded to an Arduino board, this sketch produces the following (or very similar) output via serial port every two seconds:
 
