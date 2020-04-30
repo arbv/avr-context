@@ -36,23 +36,18 @@ http://courses.cs.vt.edu/~cs5204/fall12-gback/examples/threads/coroutines.c
 
 static uint8_t stack[2][STACK_SIZE];       // a stack for each coroutine
 static avr_context_t coroutine_state[2];   // container to remember context
-static int arguments[2];                   // coroutine arguments
+static size_t arguments[2];                // coroutine arguments
 
 // switch current coroutine (0 -> 1 -> 0 -> 1 ...)
-static void yield_to_next(void)
+static void yield_to_next(const size_t current_num)
 {
-    static size_t current = 0;
-
-    size_t prev = current;
-    size_t next = 1 - current;
-
-    current = next;
-    avr_swapcontext(&coroutine_state[prev], &coroutine_state[next]);
+    const size_t next_num = current_num == 0 ? 1 : 0;
+    avr_swapcontext(&coroutine_state[current_num], &coroutine_state[next_num]);
 }
 
 static void coroutine(void *data)
 {
-    const int coroutine_number = *((int *)data);
+    const size_t coroutine_number = *((size_t *)data);
     for (size_t i = 0; i < 5; i++)
     {
         Serial.print(F("Coroutine "));
@@ -62,7 +57,7 @@ static void coroutine(void *data)
         Serial.print(F(" (&i=0x"));
         Serial.print((uintptr_t)&i, HEX);
         Serial.println(F(")"));
-        yield_to_next();
+        yield_to_next(coroutine_number);
     }
 }
 
@@ -72,19 +67,20 @@ static void coroutines_example(void)
     // set up
     for (size_t i = 0; i < 2; i++)
     {
-        // initialize avr_context_t
+        // initialise avr_context_t
         avr_getcontext(&coroutine_state[i]);
         arguments[i] = i;
         avr_makecontext(&coroutine_state[i],
                         (void *)stack[i], STACK_SIZE, // set up per-context stack
                         &return_to_main, // when done, resume 'return_to_main' context
-                        coroutine, //let context[i] perform a call to coroutine(i) when swapped to
+                        coroutine, //let coroutine_state[i] perform a call to coroutine(i) when swapped to
                         &arguments[i]);
 
     }
 
     Serial.println(F("Starting coroutines...\n"));
     avr_swapcontext(&return_to_main, &coroutine_state[0]);
+    // only one of the coroutines reaches this point.
     Serial.println(F("Done.\n"));
 }
 
