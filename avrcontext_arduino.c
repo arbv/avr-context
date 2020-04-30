@@ -12,5 +12,9 @@
 
 #include "avrcontext.h"
 #include "avrcontext_impl.h"
+
+#include "avrcoro.h"
+#include "avrcoro_impl.h"
+
 #endif
 

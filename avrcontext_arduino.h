@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include "avrcontext.h"
+#include "avrcoro.h"
 
 #endif /* AVRCONTEXT_ARDUINO_H */
 
