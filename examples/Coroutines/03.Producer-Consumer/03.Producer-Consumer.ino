@@ -54,14 +54,15 @@ static int receive(avr_coro_t *self)
     return *data;
 }
 
-static void *producer_func(avr_coro_t *, void *)
+static void *producer_func(avr_coro_t *, void *data)
 {
+    avr_coro_t *cons = (avr_coro_t *)data;
     int num = 0;
     for (;;)
     {
         Serial.print(F("Produced: "));
         Serial.println(num);
-        send(&consumer, num);
+        send(cons, num);
         num++;
         delay(1000);
     }
@@ -82,6 +83,7 @@ static void *consumer_func(avr_coro_t *self, void *)
 
 void setup()
 {
+    void *data;
     avr_coro_init(&producer,
                   &producer_stack[0], STACK_SIZE,
                   producer_func);
@@ -92,7 +94,8 @@ void setup()
     while(!Serial)
         ;
     avr_coro_resume(&consumer, NULL);
-    avr_coro_resume(&producer, NULL);
+    data = &consumer;
+    avr_coro_resume(&producer, &data);
     // unreachable
 }
 
