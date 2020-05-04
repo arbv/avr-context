@@ -76,9 +76,9 @@ int avr_coro_yield(avr_coro_t *self, void **data)
     return 0;
 }
 
-avr_coro_status_t avr_coro_status(const avr_coro_t *coro)
+avr_coro_state_t avr_coro_state(const avr_coro_t *coro)
 {
-    return coro == NULL ? AVR_CORO_ILLEGAL : (avr_coro_status_t)coro->status;
+    return coro == NULL || (coro->status >= AVR_CORO_SLEEPING && coro->status < AVR_CORO_ILLEGAL) ? AVR_CORO_ILLEGAL : (avr_coro_state_t)coro->status;
 }
 
 #endif /* __AVR__ */

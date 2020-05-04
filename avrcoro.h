@@ -10,13 +10,13 @@
 
 #ifdef __AVR__
 
-/* Coroutine status codes */
-typedef enum avr_coro_status_t_ {
-    AVR_CORO_SLEEPING = 1,
+/* Coroutine state codes */
+typedef enum avr_coro_state_t_ {
+    AVR_CORO_SLEEPING = 0,
     AVR_CORO_RUNNING,
     AVR_CORO_DEAD,
     AVR_CORO_ILLEGAL,
-} avr_coro_status_t;
+} avr_coro_state_t;
 
 typedef struct avr_coro_t_ {
     char status;
@@ -36,7 +36,7 @@ extern int avr_coro_init(avr_coro_t *coro,
                          avr_coro_func_t func);
 extern int avr_coro_resume(avr_coro_t *coro, void **data);
 extern int avr_coro_yield(avr_coro_t *self, void **data);
-extern avr_coro_status_t avr_coro_status(const avr_coro_t *coro);
+extern avr_coro_state_t avr_coro_state(const avr_coro_t *coro);
 #ifdef __cplusplus
 }
 #endif /*__cplusplus */

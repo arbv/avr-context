@@ -102,7 +102,7 @@ static void coroutines_example(void)
         // Stop when a coroutine has died (the function returned).
         // Please notice that in this case only one of the coroutines
         // reaches the point when its function returns.
-        if (avr_coro_status(&coroutine_state[yield_to]) == AVR_CORO_DEAD)
+        if (avr_coro_state(&coroutine_state[yield_to]) == AVR_CORO_DEAD)
         {
             break;
         }
