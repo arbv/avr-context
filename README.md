@@ -167,7 +167,7 @@ Every example below is a complete Arduino sketch. It was decided to use Arduino 
 
 Nevertheless, this library can be used on its own on AVR controllers: it does not contain any Arduino-specific code. Hopefully, the examples are easy to adapt to any AVR based hardware.
 
-## [GOTO via Context Switching](./examples/Low_Level/01.GOTO_via_Context_Switching/01.GOTO_via_Context_Switching.ino)
+## [GOTO via Context Switching](./examples/Context_Switching/01.GOTO_via_Context_Switching/01.GOTO_via_Context_Switching.ino)
 
 This example demonstrates how `avr_getcontext()` and `avr_setcontext()` could be used to emulate the `GOTO` operator.
 
@@ -183,7 +183,7 @@ Please notice that:
 2. Execution never reaches the end of the `setup()` function.
 3. As the consequence of the previous point: `loop()` function never gets called.
 
-### [Non-Linear Program Execution](./examples/Low_Level/02.Non-Linear_Program_Execution/02.Non-Linear_Program_Execution.ino)
+### [Non-Linear Program Execution](./examples/Context_Switching/02.Non-Linear_Program_Execution/02.Non-Linear_Program_Execution.ino)
 
 This example demonstrates how `avr_makecontext()` and `avr_swapcontext()` could be used to achieve non-linear execution of a program.
 
@@ -200,7 +200,7 @@ finish f1
 loop() end
 ```
 
-### [Symmetric Stackful Coroutines](./examples/Low_Level/03.Symmetric_Stackful_Coroutines/03.Symmetric_Stackful_Coroutines.ino)
+### [Symmetric Stackful Coroutines](./examples/Context_Switching/03.Symmetric_Stackful_Coroutines/03.Symmetric_Stackful_Coroutines.ino)
 
 This example demonstrates how `avr_makecontext()` and `avr_swapcontext()` could be used to implement coroutines.
 
@@ -222,7 +222,7 @@ Coroutine 1 counts i=4 (&i=0x20A)
 Done.
 ```
 
-### [Preemptive Task Switching](./examples/Low_Level/04.Preemptive_Task_Switching/04.Preemptive_Task_Switching.ino)
+### [Preemptive Task Switching](./examples/Context_Switching/04.Preemptive_Task_Switching/04.Preemptive_Task_Switching.ino)
 
 This example shows how preemptive task switching can be implemented on top of `avr_getcontext()`, `avr_makecontext()`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER()`,`AVR_RESTORE_CONTEXT_GLOBAL_POINTER()` and a hardware timer, which generates interrupts.
 
