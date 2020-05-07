@@ -34,7 +34,7 @@ int avr_coro_init(avr_coro_t *coro,
     {
         return 1;
     }
-    coro->status = (char)AVR_CORO_SLEEPING;
+    coro->status = (char)AVR_CORO_SUSPENDED;
     coro->funcp = (void *)funcp;
     avr_getcontext(&coro->exec);
     avr_makecontext(&coro->exec,
@@ -46,7 +46,7 @@ int avr_coro_init(avr_coro_t *coro,
 
 int avr_coro_resume(avr_coro_t *coro, void **data)
 {
-    if (coro == NULL || coro->status != (char)AVR_CORO_SLEEPING)
+    if (coro == NULL || coro->status != (char)AVR_CORO_SUSPENDED)
     {
         return 1;
     }
@@ -66,7 +66,7 @@ int avr_coro_yield(avr_coro_t *self, void **data)
     {
         return 1;
     }
-    self->status = (char)AVR_CORO_SLEEPING;
+    self->status = (char)AVR_CORO_SUSPENDED;
     self->data = data == NULL ? NULL : *data;
     avr_swapcontext(&self->exec, &self->ret);
     if (data != NULL)
@@ -78,7 +78,7 @@ int avr_coro_yield(avr_coro_t *self, void **data)
 
 avr_coro_state_t avr_coro_state(const avr_coro_t *coro)
 {
-    return coro == NULL || (coro->status >= AVR_CORO_SLEEPING && coro->status < AVR_CORO_ILLEGAL) ? AVR_CORO_ILLEGAL : (avr_coro_state_t)coro->status;
+    return coro == NULL || coro->status < AVR_CORO_SUSPENDED || coro->status >= AVR_CORO_ILLEGAL ? AVR_CORO_ILLEGAL : (avr_coro_state_t)coro->status;
 }
 
 #endif /* __AVR__ */
