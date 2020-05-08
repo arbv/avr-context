@@ -1,6 +1,6 @@
 # Description
 
-This library provides facility for context switching and provides implementation of asymmetric stackful coroutines on an AVR micro-controller.
+This library provides facility for context switching and contains implementation of asymmetric stackful coroutines on an AVR micro-controller.
 
 The low level context switching facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`). It is safe to say that this facility provifes implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
 
