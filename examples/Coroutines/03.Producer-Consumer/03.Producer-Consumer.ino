@@ -5,7 +5,7 @@ solve a well known "producer-consumer" problem.
 Coroutines communicate using the send() and receive() functions.
 send() passes a value to the consumer and resumes it, receive() gets
 value from the producer and returns control back to it. These actions
-are repeated indefinitely.
+are repeated forever.
 
 It is a consumer-driven design because the program starts by calling
 the consumer. When the consumer needs an item, it resumes the

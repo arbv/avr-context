@@ -15,7 +15,9 @@ As many Arduino boards are powered by AVR micro-controllers, this library can be
 
 # Application Programming Interface
 
-## Data Types
+## Context Switching
+
+### Data Types
 
 ```
 avr_context_t
@@ -24,7 +26,7 @@ avr_context_t
 The `avr_context_t` represents a machine context. It should be treated as an opaque data type.
 
 
-## Functions
+### Functions
 
 The four functions `avr_getcontext()`, `avr_setcontext()`, `avr_swapcontext()`, and `avr_makecontext()` provide facility for context switching between multiple threads of execution.
 
@@ -63,7 +65,7 @@ The function `avr_makecontext()` modifies the context obtained by a call to `avr
 
 Before invoking the `avr_makecontext()`, the caller must allocate a new stack for the modifiable context and pass pointer to it (`stackp`) and the size of the memory region (`stack_size`).
 
-## Macros
+### Macros
 
 ```
 #define AVR_SAVE_CONTEXT(presave_code, load_address_to_Z_code)
@@ -112,6 +114,75 @@ avr_context_t *volatile avr_current_ctx;
 ```
 
 As these macros implemented on top of the `AVR_SAVE_CONTEXT` and `AVR_RESTORE_CONTEXT`, please make sure that you understand how they work.
+
+## Coroutines
+
+There are four functions that implement the asymmetric stackful coroutine facility: `avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`. They are implemented on top of the context switching facility.
+
+A coroutine is represented by the `avr_coro_t` opaque data type. A coroutine can be in one of the following states.
+
+1. Suspended
+2. Running
+3. Dead
+
+All of the functions return `0` on success or `1` on failure with one notable exception: `avr_coro_state()` returns either a state of a coroutine (represented as a member of the `avr_coro_state_t` data type), or `AVR_CORO_ILLEGAL` status on failure.
+
+Failure status usually means that a wrong argument has been passed to the function.
+
+### Data Types
+
+```
+avr_coro_t
+```
+
+An opaque data type which represents a coroutine.
+
+### Functions
+
+```
+int avr_coro_init(avr_coro_t *coro,
+                  void *stackp, const size_t stack_size,
+                  avr_coro_func_t func);
+```
+The function `avr_coro_init()` initialises a coroutine, represented by a structure pointed at by `coro`. The coroutine gets initialised in the suspended state. Upon resumption, the function `func` gets called with two arguments applied: a pointer to the `avr_coro_t` structure itself (`self`), an argument passed on at first resumption.
+
+
+```
+int avr_coro_resume(avr_coro_t *coro, void **data);
+int avr_coro_yield(avr_coro_t *self, void **data);
+```
+The function `avr_coro_resume()` resumes execution of a coroutine, represented by a structure pointed at by `coro.` The coroutine might return control to the invoker by calling the function `avr_coro_yield()`. It accepts a currently running coroutine represented by a structure pointed at by `self`.
+
+Both of the functions accept pointer to a pointer as the last argument (`data`). The coroutine and its invoker can exchange data using this last argument. When the coroutine gets resumed using `avr_coro_resume()` for the first time, a value of the pointer, to which `data` points, gets passed as the second argument to the coroutine function.
+
+After the call to the avr_coro_resume() returns, the pointer to which `data` points during the call, gets initialised to the value, correspondingly passed as the last argument of `avr_coro_yield()`.
+
+Symmetrically, after the call to the `avr_coro_yield()` returns, the pointer to which `data` points during the call, gets initialised to the value correspondingly passed as the last argument of `avr_coro_resume()`.
+
+When the coroutine's function returns (and, thus, becomes dead), the returned value initialises the pointer to which `data` points during the corresponding `avr_coro_resume()` call.
+
+If there is no need to exchange data between the coroutine and its invoker, one can pass the `NULL` value as the `data` argument to `avr_coro_resume()`/`avr_coro_yield()`.
+
+
+```
+typedef enum avr_coro_state_t_ {
+    AVR_CORO_SUSPENDED = 0,
+    AVR_CORO_RUNNING,
+    AVR_CORO_DEAD,
+    AVR_CORO_ILLEGAL,
+} avr_coro_state_t;
+
+avr_coro_state_t avr_coro_state(const avr_coro_t *coro);
+
+```
+
+The function `avr_coro_state()` returns the current state of a coroutine:
+
+1. If the coroutine is suspended, the function returns `AVR_CORO_SUSPENDED`.
+2. If the coroutine is running, the function returns `AVR_CORO_RUNNING`. This value can be obtained only from within the context of the currently running coroutine.
+3. If the coroutine is dead, the function returns `AVR_CORO_DEAD`.
+
+The value `AVR_CORO_ILLEGAL` gets returned in the case of error (e.g. the `NULL` value was passed instead of a pointer to a coroutine).
 
 # Usage
 
@@ -167,7 +238,9 @@ Every example below is a complete Arduino sketch. It was decided to use Arduino 
 
 Nevertheless, this library can be used on its own on AVR controllers: it does not contain any Arduino-specific code. Hopefully, the examples are easy to adapt to any AVR based hardware.
 
-## [GOTO via Context Switching](./examples/Context_Switching/01.GOTO_via_Context_Switching/01.GOTO_via_Context_Switching.ino)
+## Context Switching
+
+### [GOTO via Context Switching](./examples/Context_Switching/01.GOTO_via_Context_Switching/01.GOTO_via_Context_Switching.ino)
 
 This example demonstrates how `avr_getcontext()` and `avr_setcontext()` could be used to emulate the `GOTO` operator.
 
@@ -233,6 +306,111 @@ One notable interesting point here is that we convert the initial execution cont
 Please keep in mind that our intention here is to show how task switching can be performed in a preemptive task executive, not to implement an RTOS in one Arduino sketch. In a real RTOS system timer would tick at a much higher rate, and on every tick, it would perform much more complicated scheduling code.
 
 Nevertheless, if you are brave enough to write your own RTOS, this tiny sketch might be a good start.
+
+## Coroutines
+
+### [Basic_Generator](./examples/Coroutines/01.Basic_Generator/01.Basic_Generator.ino)
+
+This example demonstrates how an asymmetric coroutine might be used as a generator.  Every time the coroutine gets invoked it generates the next number in sequence (`0...N`) and returns it back to the invoker.
+
+One of the important points of this example is to demonstrate how a value from the coroutine can be passed back to the invoker.
+
+When being uploaded to an Arduino board, this sketch print numbers in increasing order via serial port every one second, e.g.:
+
+
+```
+0
+1
+2
+3
+4
+5
+...
+
+```
+
+### [Symmetric_Coroutines_via_Asymmetric_Ones](./examples/Coroutines/02.Symmetric_Coroutines_via_Asymmetric_Ones/02.Symmetric_Coroutines_via_Asymmetric_Ones.ino)
+
+This example demonstrates how one could implement symmetric coroutines on top of the asymmetric ones.
+
+The most important difference between the symmetric and asymmetric coroutines is that the asymmetric ones cannot pass control to the other coroutine directly: they can return control only back to the coroutine invoker. Nevertheless, they are no less powerful.
+
+To bypass the above-mentioned limitation, a coroutine, which yields control, passes the information about the coroutine which it wants to activate to a dispatching loop. The loop, in turn, activates the next coroutine.
+
+It is a version of the other example, which was implemented directly on top of `avr_makecontext()`, `avr_swapcontext()`.
+
+When being uploaded to an Arduino board, this sketch produces the following (or very similar) output via serial port every two seconds:
+
+```
+Starting coroutines...
+
+Coroutine 0 counts i=0 (&i=0x18A)
+Coroutine 1 counts i=0 (&i=0x20A)
+Coroutine 0 counts i=1 (&i=0x18A)
+Coroutine 1 counts i=1 (&i=0x20A)
+Coroutine 0 counts i=2 (&i=0x18A)
+Coroutine 1 counts i=2 (&i=0x20A)
+Coroutine 0 counts i=3 (&i=0x18A)
+Coroutine 1 counts i=3 (&i=0x20A)
+Coroutine 0 counts i=4 (&i=0x18A)
+Coroutine 1 counts i=4 (&i=0x20A)
+Done.
+
+```
+
+### [Producer-Consumer](./examples/Coroutines/03.Producer-Consumer/03.Producer-Consumer.ino)
+
+This example demonstrates how asymmetric coroutines can be used to solve a well known "producer-consumer" problem.
+
+Coroutines communicate using the `send()` and `receive()` functions. `send()` passes a value to the consumer and resumes it, `receive()` gets value from the producer and returns control back to it. These actions are repeated forever.
+
+It is a consumer-driven design because the program starts by calling the consumer. When the consumer needs an item, it resumes the producer, which runs until it has an item to give to the consume, and then pauses until the consumer restarts it again.
+
+When being uploaded to an Arduino board, this sketch produces a pair of messages via serial port every one second in the following format:
+
+```
+Produced: 0
+Consumed: 0
+Produced: 1
+Consumed: 1
+Produced: 2
+Consumed: 2
+Produced: 3
+Consumed: 3
+Produced: 4
+Produced: 4
+...
+```
+### [Producer-Filter-Consumer](./examples/Coroutines/04.Producer-Filter-Consumer/04.Producer-Filter-Consumer.ino)
+
+This example demonstrates how asymmetric coroutines can be used to solve the "producer-filter-consumer" problem (one can also call the filter as "mediator").
+
+Coroutines communicate using the `send()` and `receive()` functions. The function `send()` passes a value to the receiver and returns control back to the invoker, the function `receive()` gets value from the sender and resumes it.
+
+It is a consumer-driven design because the program starts by calling a consumer. The consumer receives a value from a filter and thus resumes it. Then the filter receives the value from a producer (again, by resuming it) and doubles it. After that, the filter sends the doubled value to the consumer. By doing so it resumes the consumer. Then the whole process repeats.
+
+When being uploaded to an Arduino board, this sketch produces a triplet of messages via serial port every one second in the following format.
+
+```
+Produced: 0
+Filtered: 0
+Produced: 0
+Produced: 1
+Filtered: 2
+Produced: 2
+Filtered: 4
+Consumed: 4
+Produced: 3
+Filtered: 6
+Consumed: 6
+Produced: 4
+Filtered: 8
+Consumed: 8
+Produced: 5
+Filtered: 10
+Consumed: 10
+...
+```
 
 # Copyright
 

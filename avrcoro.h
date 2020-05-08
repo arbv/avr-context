@@ -34,6 +34,17 @@ typedef void *(*avr_coro_func_t)(avr_coro_t *, void *);
 extern "C" {
 #endif /*__cplusplus */
 /*
+There are four functions that implement the asymmetric stackful
+coroutine facility: avr_coro_init(), avr_coro_resume(),
+avr_coro_yield(), avr_coro_state().
+
+A coroutine is represented by the "avr_coro_t"
+opaque data type. A coroutine can be in one of the following states.
+
+1. Suspended
+2. Running
+3. Dead
+
 All of the functions return 0 on success or 1 on failure with one
 notable exception: avr_coro_state() returns either a state of a
 coroutine (represented as a member of the "avr_coro_state_t" data
@@ -41,13 +52,6 @@ type), or "AVR_CORO_ILLEGAL" status on failure.
 
 Failure status usually means that a wrong argument has been passed to
 the function.
-
-A coroutine is represented by the "avr_coro_t" opaque data type. A
-coroutine can be in one of the following states.
-
-1. Suspended
-2. Running
-3. Dead
 
 The function avr_coro_init() initialises a coroutine, represented by a
 structure pointed at by "coro." The coroutine gets initialised in the
