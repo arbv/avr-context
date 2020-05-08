@@ -248,7 +248,7 @@ In the case when a project consists of multiple source files and the functionali
 
 # Examples
 
-Every example below is a complete Arduino sketch. It was decided to use Arduino boards for examples because the boards have somewhat standardised application programming interface and hardware.
+The examples below may be used as a tutorial. Every example is a complete Arduino sketch. It was decided to use Arduino boards for examples because the boards have somewhat standardised application programming interface and hardware.
 
 Nevertheless, this library can be used on its own on AVR controllers: it does not contain any Arduino-specific code. Hopefully, the examples are easy to adapt to any AVR based hardware.
 
@@ -323,7 +323,7 @@ Nevertheless, if you are brave enough to write your own RTOS, this tiny sketch m
 
 ## Coroutines
 
-### [Basic_Generator](./examples/Coroutines/01.Basic_Generator/01.Basic_Generator.ino)
+### [Basic Generator](./examples/Coroutines/01.Basic_Generator/01.Basic_Generator.ino)
 
 This example demonstrates how an asymmetric coroutine might be used as a generator.  Every time the coroutine gets invoked it generates the next number in sequence (`0...N`) and returns it back to the invoker.
 
@@ -343,7 +343,7 @@ When being uploaded to an Arduino board, this sketch print numbers in increasing
 
 ```
 
-### [Symmetric_Coroutines_via_Asymmetric_Ones](./examples/Coroutines/02.Symmetric_Coroutines_via_Asymmetric_Ones/02.Symmetric_Coroutines_via_Asymmetric_Ones.ino)
+### [Symmetric Coroutines via Asymmetric Ones](./examples/Coroutines/02.Symmetric_Coroutines_via_Asymmetric_Ones/02.Symmetric_Coroutines_via_Asymmetric_Ones.ino)
 
 This example demonstrates how one could implement symmetric coroutines on top of the asymmetric ones.
 
