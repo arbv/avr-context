@@ -434,9 +434,10 @@ Consumed: 10
 
 1. [Richard Barry - Multitasking on an AVR, 2004](https://xivilization.net/~marek/binaries/multitasking.pdf)
 2. [FreeRTOS Implementation Building Blocks: The AVR Context](https://www.freertos.org/implementation/a00015.html)
-3. [The Open Group Base Specifications Issue 6: getcontext, setcontext - get and set current user context](https://pubs.opengroup.org/onlinepubs/009695399/functions/getcontext.html)
-4. [The Open Group Base Specifications Issue 6: makecontext, swapcontext - manipulate user contexts](https://pubs.opengroup.org/onlinepubs/009695399/functions/makecontext.html)
-5. [Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines, ACM Transactions on Programming Languages and Systems 31(2), July 2004](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf)
+3. [Microchip Technology - AVR Instruction Set Manual](http://ww1.microchip.com/downloads/en/devicedoc/atmel-0856-avr-instruction-set-manual.pdf)
+4. [The Open Group Base Specifications Issue 6: getcontext, setcontext - get and set current user context](https://pubs.opengroup.org/onlinepubs/009695399/functions/getcontext.html)
+5. [The Open Group Base Specifications Issue 6: makecontext, swapcontext - manipulate user contexts](https://pubs.opengroup.org/onlinepubs/009695399/functions/makecontext.html)
+6. [Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines, ACM Transactions on Programming Languages and Systems 31(2), July 2004](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf)
 
 # Copyright
 
