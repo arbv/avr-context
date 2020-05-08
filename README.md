@@ -54,10 +54,12 @@ The function `avr_setcontext()` restores the context from the structure pointed 
 ```
 void avr_swapcontext(avr_context_t *oucp, const avr_context_t *cp);
 
+typedef void (*avr_context_func_t)(void *);
+
 void avr_makecontext(avr_context_t *cp,
                      void *stackp, const size_t stack_size,
                      const avr_context_t *successor_cp,
-                     void (*funcp)(void *), void *funcargp);
+                     avr_context_func_t funcp, void *funcargp);
 ```
 
 The function `avr_swapcontext()` saves the current context in the structure pointed to by `oucp` and then activates the context pointed to by `cp` as one operation. It may return later when context pointed to by `oucp` gets activated.
@@ -141,6 +143,8 @@ An opaque data type which represents a coroutine.
 ### Functions
 
 ```
+typedef void *(*avr_coro_func_t)(avr_coro_t *, void *);
+
 int avr_coro_init(avr_coro_t *coro,
                   void *stackp, const size_t stack_size,
                   avr_coro_func_t func);

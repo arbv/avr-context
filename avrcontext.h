@@ -31,6 +31,8 @@ typedef struct avr_context_t_ {
     } sp;
 } avr_context_t;
 
+typedef void (*avr_context_func_t)(void *);
+
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus */
@@ -107,7 +109,7 @@ extern void avr_swapcontext(avr_context_t *oucp, const avr_context_t *cp);
 extern void avr_makecontext(avr_context_t *cp,
                             void *stackp, const size_t stack_size,
                             const avr_context_t *successor_cp,
-                            void (*funcp)(void *), void *funcargp);
+                            avr_context_func_t funcp, void *funcargp);
 
 #ifdef __cplusplus
 }
