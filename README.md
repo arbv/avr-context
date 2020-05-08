@@ -1,12 +1,13 @@
 # Description
 
-This library provides a low-level facility for context switching between multiple threads of execution on an AVR micro-controller. The facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`).
+This library provides facility for context switching and provides implementation of asymmetric stackful coroutines on an AVR micro-controller.
 
-It is safe to say that this library contains implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
+The low level context switching facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`). It is safe to say that this facility provifes implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
+
+The asymmetric stackful coroutines facility consists of a data type (`avr_corot_t`), and four functions ( `avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`). This functionality is implemented on top of the context switching facility.
 
 One can use the provided functionality in many creative ways. For example, on top of this one can implement:
 
-* coroutines and fibers;
 * cooperative and preemptive multitasking;
 * complex error recovery mechanisms;
 * profiling.
@@ -199,29 +200,41 @@ If you want to keep your project self contained, you may want to use the library
 
 ## Generic
 
-The core of the library consists of two files: a *header file with declarations* (`avrcontext.h`) and a *header file with definitions* (`avrcontext_impl.h`). No header file includes any other header files.  The *header file with definitions* should be used *only once* across the project. The files `avrcontext_arduino.c` and `avrcontext_arduino.h` are there to make it possible to use this code as an Arduino library. If you do not rely on Arduino platform when developing your project, you probably do not need these files.
+The core of the library consists of four files: two *header files with declarations* (`avrcontext.h`, `avrcoro.h`) and two *header files with definitions* (`avrcontext_impl.h`, `avrcoro_impl.h`). No header file includes any other header files.  The *header files with definitions* should be used *only once* across the project.
+
+The files `avrcontext_arduino.c` and `avrcontext_arduino.h` are there to make it possible to use this code as an Arduino library. If you do not rely on Arduino platform when developing your project, you probably do not need these files.
 
 This organisation of the project provides extra flexibility without demanding any particular structure from projects which use this library. It is especially convenient if you want to keep your projects self-contained.
 
-For example, you can dedicate one of the C or C++ source files in the project (e.g. `avrcontext.c`) to the definitions of `avr_getcontext()`, `avr_setcontext()`, `avr_swapcontext()`, and `avr_makecontext()`. In this case you can put the following content into that file (assuming that the library is in the `avr-context` directory):
+Please keep in mind that coroutines facility depends on context switching facility.
+
+For example, you can dedicate one of the C or C++ source files in the project (e.g. `avrcontext.c`) to the definitions of the functions which implement functionality of the library. In this case you can put the following content into that file (assuming that the library is in the `avr-context` directory):
 
 ```
 #include <stdint.h>
 #include <stdlib.h>
 #include <avr/io.h>
 
+/* context switching */
 #include "avr-context/avrcontext.h"
 #include "avr-context/avrcontext_impl.h"
+/* coroutines */
+#include "avr-context/avrcoro.h"
+#include "avr-context/avrcoro_impl.h"
 ```
 
 If it a one-file project, then putting the text above into the include section of the file would be enough. If it is an Arduino sketch, then it could be even simpler than that (assuming that the library is in the `avr-context` directory that is inside the directory of the sketch):
 
 ```
+/* context switching */
 #include "avr-context/avrcontext.h"
 #include "avr-context/avrcontext_impl.h"
+/* coroutines */
+#include "avr-context/avrcoro.h"
+#include "avr-context/avrcoro_impl.h"
 ```
 
-In the case when a project consists of multiple source files and the functionality of this library required in more than one of them, you can put the following into the include sections of the files (please notice the absence of `avrcontext_impl.h`):
+In the case when a project consists of multiple source files and the functionality of this library required in more than one of them, you can put the following into the include sections of the files (please notice the absence of `avrcontext_impl.h` and `avrcoro_impl.h`):
 
 ```
 #include <stdint.h>
@@ -229,6 +242,7 @@ In the case when a project consists of multiple source files and the functionali
 #include <avr/io.h>
 
 #include "avr-context/avrcontext.h"
+#include "avr-context/avrcoro.h" /* if you need coroutines */
 ```
 
 
