@@ -2,9 +2,9 @@
 
 This library provides a low-level facility for context switching between multiple threads of execution and contains an implementation of asymmetric stackful coroutines on an AVR micro-controller.
 
-The low level context switching facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`). It is safe to say that this facility provifes implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
+The low level context switching facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`). It is safe to say that this facility provides implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
 
-The asymmetric stackful coroutines facility consists of a data type (`avr_corot_t`), and four functions (`avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`). This functionality is implemented on top of the context switching facility. This facility semantics closely follows the semantics of asymmetric stackful coroutines described in the paper ["Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines"](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf).
+The asymmetric stackful coroutines facility consists of a data type (`avr_coro_t`),1 and four functions (`avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`). This functionality is implemented on top of the context switching facility. This facility semantics closely follows the semantics of asymmetric stackful coroutines described in the paper ["Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines"](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf).
 
 One can use the provided functionality in many creative ways. For example, on top of this one can implement:
 
@@ -160,7 +160,7 @@ The function `avr_coro_resume()` resumes execution of a coroutine, represented b
 
 Both of the functions accept pointer to a pointer as the last argument (`data`). The coroutine and its invoker can exchange data using this last argument. When the coroutine gets resumed using `avr_coro_resume()` for the first time, a value of the pointer, to which `data` points, gets passed as the second argument to the coroutine function.
 
-After the call to the avr_coro_resume() returns, the pointer to which `data` points during the call, gets initialised to the value, correspondingly passed as the last argument of `avr_coro_yield()`.
+After the call to the `avr_coro_resume()` returns, the pointer to which `data` points during the call, gets initialised to the value, correspondingly passed as the last argument of `avr_coro_yield()`.
 
 Symmetrically, after the call to the `avr_coro_yield()` returns, the pointer to which `data` points during the call, gets initialised to the value correspondingly passed as the last argument of `avr_coro_resume()`.
 
