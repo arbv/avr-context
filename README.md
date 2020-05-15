@@ -4,7 +4,7 @@ This library provides a low-level facility for context switching between multipl
 
 The low level context switching facility consists of a data type (`avr_context_t`), functions (`avr_getcontext()`, `avr_setcontext()`, `avr_makecontext()`, `avr_swapcontext()`), and macros (`AVR_SAVE_CONTEXT`, `AVR_RESTORE_CONTEXT`, `AVR_SAVE_CONTEXT_GLOBAL_POINTER`, `AVR_RESTORE_CONTEXT_GLOBAL_POINTER`). It is safe to say that this facility provides implementations (or, rather, substitutes) for `getcontext()`, `setcontext()`, `makecontext()`, and `swapcontext()` which are available on the UNIX-like systems.
 
-The asymmetric stackful coroutines facility consists of a data type (`avr_coro_t`),1 and four functions (`avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`). This functionality is implemented on top of the context switching facility. This facility semantics closely follows the semantics of asymmetric stackful coroutines described in the paper ["Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines"](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf).
+The asymmetric stackful coroutines facility consists of a data type (`avr_coro_t`), and four functions (`avr_coro_init()`, `avr_coro_resume()`, `avr_coro_yield()`, `avr_coro_state()`). This functionality is implemented on top of the context switching facility. This facility semantics closely follows the semantics of asymmetric stackful coroutines described in the paper ["Ana Lucia De Moura, Roberto Ierusalimschy - Revisiting Coroutines"](http://www.inf.puc-rio.br/~roberto/docs/MCC15-04.pdf).
 
 One can use the provided functionality in many creative ways. For example, on top of this one can implement:
 
